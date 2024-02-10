@@ -1,0 +1,81 @@
+blueprint:
+  name: Sync Garage Door with Sensor State
+  description: Controls a garage door based on the state of a sensor.
+  domain: automation
+  # Author: Todd Hutchinson	
+  # Credits: ChatGPT, and some time
+  input:
+    garage_door_sensor:
+      name: Garage Door Sensor
+      description: The sensor that monitors the garage door's state, with capitalized states.
+      selector:
+        entity:
+          domain: sensor
+    garage_door_cover:
+      name: Garage Door
+      description: The cover entity for the garage door.
+      selector:
+        entity:
+          domain: cover
+
+trigger:
+  - platform: state
+    entity_id: !input garage_door_sensor
+    to: "Open"
+  - platform: state
+    entity_id: !input garage_door_sensor
+    to: "Opening"
+  - platform: state
+    entity_id: !input garage_door_sensor
+    to: "Closed"
+  - platform: state
+    entity_id: !input garage_door_sensor
+    to: "Closing"
+  - platform: state
+    entity_id: !input garage_door_sensor
+    to: "Stopped"
+
+action:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: !input garage_door_sensor
+            state: "Open"
+        sequence:
+          - service: cover.open_cover
+            target:
+              entity_id: !input garage_door_cover
+      - conditions:
+          - condition: state
+            entity_id: !input garage_door_sensor
+            state: "Opening"
+        sequence:
+          - service: cover.open_cover
+            target:
+              entity_id: !input garage_door_cover
+      - conditions:
+          - condition: state
+            entity_id: !input garage_door_sensor
+            state: "Closed"
+        sequence:
+          - service: cover.close_cover
+            target:
+              entity_id: !input garage_door_cover
+      - conditions:
+          - condition: state
+            entity_id: !input garage_door_sensor
+            state: "Closing"
+        sequence:
+          - service: cover.close_cover
+            target:
+              entity_id: !input garage_door_cover
+      - conditions:
+          - condition: state
+            entity_id: !input garage_door_sensor
+            state: "Stopped"
+        sequence:
+          - service: cover.stop_cover
+            target:
+              entity_id: !input garage_door_cover
+
+mode: restart
